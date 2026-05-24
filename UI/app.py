@@ -47,7 +47,7 @@ if user_search:
             st.caption(f"💡 Did you mean: {', '.join(matched_search)}?")
         st.markdown(
             '<p style="color: #FF4B4B; background-color: #FFEBEB; padding: 8px; border-radius: 4px; border: 1px solid #FF4B4B;">❌ Account ID not found in system directory.</p>', 
-            unsafe_html=True
+            unsafe_allow_html=True
         )
 else:
     st.session_state.logged_in_user = None
@@ -108,11 +108,11 @@ if st.session_state.logged_in_user:
                 recipient_valid = True
                 target_recipient_display = clean_rec
             elif clean_rec == current_uid:
-                st.markdown('<p style="color: #FF4B4B; background-color: #FFEBEB; padding: 8px; border-radius: 4px;">❌ Self-transfers are rejected.</p>', unsafe_html=True)
+                st.markdown('<p style="color: #FF4B4B; background-color: #FFEBEB; padding: 8px; border-radius: 4px;">❌ Self-transfers are rejected.</p>', unsafe_allow_html=True)
             else:
                 if matched_rec:
                     st.caption(f"💡 Suggested: {', '.join(matched_rec)}")
-                st.markdown('<p style="color: #FF4B4B; background-color: #FFEBEB; padding: 8px; border-radius: 4px;">❌ Invalid recipient ID target.</p>', unsafe_html=True)
+                st.markdown('<p style="color: #FF4B4B; background-color: #FFEBEB; padding: 8px; border-radius: 4px;">❌ Invalid recipient ID target.</p>', unsafe_allow_html=True)
 
         amount = st.number_input("💵 Transfer Value ($):", min_value=0.0, step=10.0, format="%.7f")
 
@@ -190,7 +190,7 @@ if st.session_state.logged_in_user:
                     <h4>🔒 Out-of-Band Validation Shield Engaged</h4>
                     <p>Enter the temporary security token to release the transaction vault locks.</p>
                 </div>
-            """, unsafe_html=True)
+            """, unsafe_allow_html=True)
             
             entered_pin = st.text_input("🔑 Enter Code:", max_chars=6, type="password")
             col_v, col_c = st.columns(2)
@@ -203,7 +203,7 @@ if st.session_state.logged_in_user:
                     if is_valid:
                         st.session_state.transaction_alert_message = f"Payment Authorized: {release_msg}"
                         st.session_state.transaction_alert_type = "SUCCESS"
-                        st.session_state.otp_active = False
+                        st.otp_active = False
                         st.session_state.current_otp = None
                         st.rerun()
                     else:
@@ -213,7 +213,7 @@ if st.session_state.logged_in_user:
                             st.session_state.otp_active = False
                             st.session_state.current_otp = None
                         else:
-                            st.markdown(f"<p style='color:red;'>❌ {validation_msg}</p>", unsafe_html=True)
+                            st.markdown(f"<p style='color:red;'>❌ {validation_msg}</p>", unsafe_allow_html=True)
                         st.rerun()
             with col_c:
                 if st.button("❌ Break Connection", use_container_width=True):
