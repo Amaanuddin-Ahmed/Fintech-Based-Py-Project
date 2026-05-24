@@ -33,3 +33,25 @@ Balance validation
 Money transfer
 ↓
 Transaction saved
+
+
+
+
+
+<br>
+<p>
+SIMPLIFIED BREAKDOWN OF PROCEDURE
+<br>
+A. Decimal Precision Handling
+Using Decimal module for exact monetary calculations.
+
+B. Adaptive Risk Scoring
+Behavior-based fraud analysis.
+
+C. Precision-Safe Transactions
+Prevents fractional money inconsistencies.
+
+D. Transaction Integrity
+Sender deduction exactly equals receiver addition.
+<br>
+</p>
