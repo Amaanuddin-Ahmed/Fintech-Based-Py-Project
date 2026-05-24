@@ -1,1 +1,5 @@
 // In this Excel File complete details of peoples Transaction will be stored 
+| transaction_id | user_id | amount | device  | hour | risk |
+| -------------- | ------- | ------ | ------- | ---- | ---- |
+| T101           | U101    | 500    | samsung | 10   | 5    |
+| T102           | U101    | 45000  | iphone  | 2    | 75   |
