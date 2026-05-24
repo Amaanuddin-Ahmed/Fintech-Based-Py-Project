@@ -58,6 +58,28 @@ def evaluate_transaction_risk(user_id, amount, hour, device, location, user_prof
         risk_score += 15
         reasons.append(f"Suspicious transaction execution processing hour: {hour}:00 HRS")
         
+    # 5. Advanced Geo-Velocity Validation (Impossible Travel Rule)
+    try:
+        df_all_txns = load_transactions()
+        user_history = df_all_txns[df_all_txns["from_user_id"] == user_id]
+        
+        if not user_history.empty:
+            # Grab the last row record in the ledger file
+            last_txn = user_history.iloc[-1]
+            last_location = str(last_txn["location"])
+            last_hour = int(last_txn["txn_hour"])
+            
+            # If location changed from the last sequential payment record entry
+            if last_location != str(location):
+                time_difference = abs(int(hour) - last_hour)
+                
+                # If transaction occurred too quickly across different regions
+                if time_difference <= 2:
+                    risk_score += 50  # Heavy weight penalty to guarantee a BLOCK status
+                    reasons.append(f"IMPOSSIBLE TRAVEL VELOCITY: Instant location shift from {last_location} to {location} within {time_difference} hour(s).")
+    except Exception as e:
+        pass # Gracefully fall back if transactional history file parsing error occurs
+        
     # Bound the metric output firmly between 0 and 100 points
     final_risk = min(100, risk_score)
     

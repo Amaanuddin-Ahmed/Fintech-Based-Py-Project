@@ -1,11 +1,11 @@
 user_id,account_holder,current_balance,trusted_device_id,home_location,account_status
-U101,Aarav Sharma,100000.0000000,iPhone15,Mumbai,ACTIVE
-U102,Diya Iyer,100000.0000000,OnePlus_11R,Bengaluru,ACTIVE
-U103,Kabir Malhotra,100000.0000000,Pixel_8_Pro,New Delhi,ACTIVE
-U104,Ananya Reddy,100000.0000000,Samsung_S24,Hyderabad,ACTIVE
-U105,Vivaan Kapoor,100000.0000000,MacBookPro_M3,Pune,ACTIVE
-U106,Meera Nair,100000.0000000,iPhone14_Pro,Chennai,ACTIVE
-U107,Rohan Das,100000.0000000,Galaxy_U1,Kolkata,ACTIVE
-U108,Isha Joshi,100000.0000000,iPad_Air,Ahmedabad,ACTIVE
-U109,Aditya Verma,100000.0000000,Nothing_Phone_2,Jaipur,ACTIVE
-U110,Zoya Khan,100000.0000000,iPhone13_Mini,Lucknow,ACTIVE
+U101,Aarav Sharma,99800.0,iPhone15,Mumbai,ACTIVE
+U102,Diya Iyer,100200.0,OnePlus_11R,Bengaluru,ACTIVE
+U103,Kabir Malhotra,100000.0,Pixel_8_Pro,New Delhi,ACTIVE
+U104,Ananya Reddy,100000.0,Samsung_S24,Hyderabad,ACTIVE
+U105,Vivaan Kapoor,100000.0,MacBookPro_M3,Pune,ACTIVE
+U106,Meera Nair,100000.0,iPhone14_Pro,Chennai,ACTIVE
+U107,Rohan Das,100000.0,Galaxy_U1,Kolkata,ACTIVE
+U108,Isha Joshi,100000.0,iPad_Air,Ahmedabad,ACTIVE
+U109,Aditya Verma,100000.0,Nothing_Phone_2,Jaipur,ACTIVE
+U110,Zoya Khan,100000.0,iPhone13_Mini,Lucknow,ACTIVE
