@@ -1,2 +1,10 @@
-    SAVES TRANSACTIONS HISTORY 
-    time       amount     location     device      attempts 
+txn_id,from_user_id,to_user_id,amount,txn_hour,device_used,location
+T1001,U101,U102,1500.0000000,14,iPhone15,Mumbai
+T1002,U101,U103,2300.0000000,11,iPhone15,Mumbai
+T1003,U101,U104,1200.0000000,18,iPhone15,Mumbai
+T1004,U102,U105,5000.0000000,10,OnePlus_11R,Bengaluru
+T1005,U102,U101,3200.0000000,16,OnePlus_11R,Bengaluru
+T1006,U103,U106,800.0000000,9,Pixel_8_Pro,New Delhi
+T1007,U103,U107,1500.0000000,13,Pixel_8_Pro,New Delhi
+T1008,U104,U101,4500.0000000,15,Samsung_S24,Hyderabad
+T1009,U104,U102,2100.0000000,12,Samsung_S24,Hyderabad
