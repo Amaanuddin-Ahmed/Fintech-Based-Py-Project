@@ -64,7 +64,8 @@ if st.session_state.logged_in_user:
     # Financial Overview Metric Cards
     m_col1, m_col2, m_col3, m_col4 = st.columns(4)
     with m_col1:
-        st.metric(label="Available Balance", value=f"${float(user_profile['current_balance']):,.2f}")
+        available_funds = float(user_profile['current_balance'])
+        st.metric(label="Available Balance", value=f"${available_funds:,.2f}")
     with m_col2:
         status_color = "🟢" if user_profile['account_status'] == "ACTIVE" else "🔴"
         st.metric(label="Account Status Flags", value=f"{status_color} {user_profile['account_status']}")
@@ -164,6 +165,12 @@ if st.session_state.logged_in_user:
         button_ready = recipient_valid and amount > 0 and (not st.session_state.otp_active)
         
         if st.button(button_label, disabled=not button_ready, use_container_width=True):
+            # FIXED: Primary check interception strategy. If the input exceeds the user account balance, fast-fail with an explicit error.
+            if amount > available_funds:
+                st.session_state.transaction_alert_message = "Transaction declined: Insufficient account funds available."
+                st.session_state.transaction_alert_type = "ERROR"
+                st.rerun()
+            
             status, response_msg = process_payment_request(
                 current_uid, 
                 recipient_input.strip().upper(), 
@@ -208,7 +215,6 @@ if st.session_state.logged_in_user:
                 if st.button("✔️ Confirm Token", use_container_width=True):
                     is_valid, validation_msg = verify_otp_attempt(current_uid, entered_pin, st.session_state.current_otp)
                     
-                    # FIXED: Safely passing parameters based on your original source file argument counts
                     try:
                         success_release, release_msg = confirm_otp_and_release_vault(is_valid, f"{amount:.7f}")
                     except TypeError:
@@ -227,9 +233,12 @@ if st.session_state.logged_in_user:
                             st.session_state.otp_active = False
                             st.session_state.current_otp = None
                         else:
-                            error_reason = release_msg if not success_release else validation_msg
-                            st.session_state.transaction_alert_message = f"Verification Failed: {error_reason}"
+                            # FIXED: Fallback filter to handle unexpected message errors or insufficient balance checks during submission
+                            error_reason = release_msg if (not success_release and release_msg) else validation_msg
+                            st.session_state.transaction_alert_message = f"{error_reason}"
                             st.session_state.transaction_alert_type = "ERROR"
+                            st.session_state.otp_active = False
+                            st.session_state.current_otp = None
                         st.rerun()
             with col_c:
                 if st.button("❌ Break Connection", use_container_width=True):
