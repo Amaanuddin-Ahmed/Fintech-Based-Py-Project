@@ -1,11 +1,11 @@
-user_id,account_holder,current_balance,trusted_device_id,home_location,account_status
-U101,Aarav Sharma,99980.0,iPhone15,Mumbai,ACTIVE
-U102,Diya Iyer,100020.0,OnePlus_11R,Bengaluru,ACTIVE
-U103,Kabir Malhotra,100000.0,Pixel_8_Pro,New Delhi,ACTIVE
-U104,Ananya Reddy,100000.0,Samsung_S24,Hyderabad,ACTIVE
-U105,Vivaan Kapoor,100000.0,MacBookPro_M3,Pune,ACTIVE
-U106,Meera Nair,100000.0,iPhone14_Pro,Chennai,ACTIVE
-U107,Rohan Das,100000.0,Galaxy_U1,Kolkata,ACTIVE
-U108,Isha Joshi,100000.0,iPad_Air,Ahmedabad,ACTIVE
-U109,Aditya Verma,100000.0,Nothing_Phone_2,Jaipur,ACTIVE
-U110,Zoya Khan,100000.0,iPhone13_Mini,Lucknow,ACTIVE
+user_id,account_holder,current_balance,trusted_device_id,home_location,account_status,failed_otp_attempts
+U101,Aarav Sharma,99980.0,iPhone15,Mumbai,ACTIVE,0.0
+U102,Diya Iyer,100020.0,OnePlus_11R,Bengaluru,ACTIVE,
+U103,Kabir Malhotra,100000.0,Pixel_8_Pro,New Delhi,ACTIVE,
+U104,Ananya Reddy,100000.0,Samsung_S24,Hyderabad,ACTIVE,
+U105,Vivaan Kapoor,100000.0,MacBookPro_M3,Pune,ACTIVE,
+U106,Meera Nair,100000.0,iPhone14_Pro,Chennai,ACTIVE,
+U107,Rohan Das,100000.0,Galaxy_U1,Kolkata,ACTIVE,
+U108,Isha Joshi,100000.0,iPad_Air,Ahmedabad,ACTIVE,
+U109,Aditya Verma,100000.0,Nothing_Phone_2,Jaipur,ACTIVE,
+U110,Zoya Khan,100000.0,iPhone13_Mini,Lucknow,ACTIVE,
