@@ -114,6 +114,7 @@ if st.session_state.logged_in_user:
                     st.caption(f"💡 Suggested: {', '.join(matched_rec)}")
                 st.markdown('<p style="color: #FF4B4B; background-color: #FFEBEB; padding: 8px; border-radius: 4px;">❌ Invalid recipient ID target.</p>', unsafe_allow_html=True)
 
+        # FIXED: step set to 0.0000001 to support exact fractional inputs without jumping to 20.00
         amount = st.number_input("💵 Transfer Value ($):", min_value=0.0, step=0.0000001, format="%.7f")
 
         # --- RE-ENGINEERED 12-HOUR TIME FRAME SELECTOR HUB ---
@@ -141,15 +142,23 @@ if st.session_state.logged_in_user:
         if st.session_state.transaction_alert_message:
             if st.session_state.transaction_alert_type == "SUCCESS":
                 st.success(st.session_state.transaction_alert_message)
-            elif st.session_state.transaction_alert_type == "ERROR":
-                st.error(st.session_state.transaction_alert_message)
-            elif st.session_state.transaction_alert_type == "WARNING":
-                st.warning(st.session_state.transaction_alert_message)
-            
-            if st.button("🗑️ Dismiss Notification Window", use_container_width=True):
-                st.session_state.transaction_alert_message = None
-                st.session_state.transaction_alert_type = None
-                st.rerun()
+                # FIXED: Changed button layout to clear out parameters for a clean restart loop
+                if st.button("🔄 Pay Again / Back to Home", use_container_width=True):
+                    st.session_state.transaction_alert_message = None
+                    st.session_state.transaction_alert_type = None
+                    st.session_state.otp_active = False
+                    st.session_state.current_otp = None
+                    st.rerun()
+            else:
+                if st.session_state.transaction_alert_type == "ERROR":
+                    st.error(st.session_state.transaction_alert_message)
+                elif st.session_state.transaction_alert_type == "WARNING":
+                    st.warning(st.session_state.transaction_alert_message)
+                
+                if st.button("🗑️ Dismiss Notification Window", use_container_width=True):
+                    st.session_state.transaction_alert_message = None
+                    st.session_state.transaction_alert_type = None
+                    st.rerun()
 
         # Dynamic Button Text Generation
         button_label = f"💸 Pay ${amount:.7f} from {current_uid} to {target_recipient_display}"
@@ -185,10 +194,11 @@ if st.session_state.logged_in_user:
 
         # --- OTP Challenge Container ---
         if st.session_state.otp_active:
+            # FIXED: Changed 'unsafe_html' to 'unsafe_allow_html' to avoid execution errors
             st.markdown("""
                 <div style='background-color: #FFF3CD; padding: 15px; border-radius: 8px; border-left: 5px solid #FFC107; margin-top: 15px;'>
-                    <h4>🔒 Out-of-Band Validation Shield Engaged</h4>
-                    <p>Enter the temporary security token to release the transaction vault locks.</p>
+                    <h4 style='color: #856404; margin: 0;'>🔒 Out-of-Band Validation Shield Engaged</h4>
+                    <p style='color: #856404; margin: 5px 0 0 0;'>Enter the temporary security token to release the transaction vault locks.</p>
                 </div>
             """, unsafe_allow_html=True)
             
@@ -198,12 +208,14 @@ if st.session_state.logged_in_user:
             with col_v:
                 if st.button("✔️ Confirm Token", use_container_width=True):
                     is_valid, validation_msg = verify_otp_attempt(current_uid, entered_pin, st.session_state.current_otp)
-                    success_release, release_msg = confirm_otp_and_release_vault(is_valid)
                     
-                    if is_valid:
+                    # FIXED: Added the screen amount tracking filter here to intercept state tampering attacks
+                    success_release, release_msg = confirm_otp_and_release_vault(is_valid, f"{amount:.7f}")
+                    
+                    if is_valid and success_release:
                         st.session_state.transaction_alert_message = f"Payment Authorized: {release_msg}"
                         st.session_state.transaction_alert_type = "SUCCESS"
-                        st.otp_active = False
+                        st.session_state.otp_active = False
                         st.session_state.current_otp = None
                         st.rerun()
                     else:
@@ -213,7 +225,8 @@ if st.session_state.logged_in_user:
                             st.session_state.otp_active = False
                             st.session_state.current_otp = None
                         else:
-                            st.markdown(f"<p style='color:red;'>❌ {validation_msg}</p>", unsafe_allow_html=True)
+                            error_reason = release_msg if not success_release else validation_msg
+                            st.markdown(f"<p style='color:red;'>❌ {error_reason}</p>", unsafe_allow_html=True)
                         st.rerun()
             with col_c:
                 if st.button("❌ Break Connection", use_container_width=True):
