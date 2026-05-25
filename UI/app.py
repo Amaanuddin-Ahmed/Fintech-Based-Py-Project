@@ -114,7 +114,7 @@ if st.session_state.logged_in_user:
                     st.caption(f"💡 Suggested: {', '.join(matched_rec)}")
                 st.markdown('<p style="color: #FF4B4B; background-color: #FFEBEB; padding: 8px; border-radius: 4px;">❌ Invalid recipient ID target.</p>', unsafe_allow_html=True)
 
-        amount = st.number_input("💵 Transfer Value ($):", min_value=0.0, step=10.0, format="%.7f")
+        amount = st.number_input("💵 Transfer Value ($):", min_value=0.0, step=0.0000001, format="%.7f")
 
         # --- RE-ENGINEERED 12-HOUR TIME FRAME SELECTOR HUB ---
         st.markdown("##### ⏰ Execution Time Frame")

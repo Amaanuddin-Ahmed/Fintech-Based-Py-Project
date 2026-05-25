@@ -1,6 +1,6 @@
 user_id,account_holder,current_balance,trusted_device_id,home_location,account_status
-U101,Aarav Sharma,100000.0,iPhone15,Mumbai,ACTIVE
-U102,Diya Iyer,100000.0,OnePlus_11R,Bengaluru,ACTIVE
+U101,Aarav Sharma,99980.0,iPhone15,Mumbai,ACTIVE
+U102,Diya Iyer,100020.0,OnePlus_11R,Bengaluru,ACTIVE
 U103,Kabir Malhotra,100000.0,Pixel_8_Pro,New Delhi,ACTIVE
 U104,Ananya Reddy,100000.0,Samsung_S24,Hyderabad,ACTIVE
 U105,Vivaan Kapoor,100000.0,MacBookPro_M3,Pune,ACTIVE
