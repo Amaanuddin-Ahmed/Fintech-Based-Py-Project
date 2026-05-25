@@ -1,7 +1,31 @@
 
 # 🏦 GuardianShield: Precision-Safe Fintech Simulator with Fraud Detection
 
-GuardianShield is a robust peer-to-peer payment gateway architecture designed to eliminate transactional math drift while actively blocking financial fraud telemetry outliers. Built around high-precision banking logic, the engine guarantees data-state alignment by coupling real-time telemetry risk evaluation with memory-isolated transaction processing.
+---
+
+### 🏦 What is GuardianShield?
+
+GuardianShield is a smart, super-safe bank simulator built with Python. Its main job is to help users send money to each other safely while keeping an eye out for sneaky scammers and hackers. Before any payment goes through, the system acts like a digital detective—checking things like the user's location, time of day, and device to make sure the request isn't a fraud attempt. If something looks fishy, it stops the transfer and asks for a security pin code to protect the user's money.
+
+---
+
+### 🎯 High-Precision Accuracy (The Math Guarantee)
+
+In regular software, computer math can sometimes make tiny rounding mistakes with numbers (like turning `$10.00` into `$9.999999`). In a banking app, losing even a single fraction of a penny is unacceptable.
+
+To fix this, GuardianShield uses a special tool called the **Decimal Module** to handle money with absolute, perfect accuracy.
+
+#### 🔍 How strict is it?
+
+* If you deposit **`$100`**, the system treats it exactly as **`100.0000000`** (carrying exactly 7 zeros after the decimal point).
+* If you try to send a payment of **`100.0000001`**, the transaction will instantly fail and be rejected!
+
+The system does a strict comparison check:
+
+
+$$100.0000000 \neq 100.0000001$$
+
+Because those two numbers are not perfectly equal, the system blocks the payment to protect the ledger from math errors. This super-precise math module can actually track up to **100 numbers after the decimal point** if needed, keeping your financial data completely airtight and scam-proof!
 
 ---
 
