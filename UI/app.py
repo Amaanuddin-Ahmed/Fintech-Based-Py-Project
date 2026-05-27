@@ -1,3 +1,8 @@
+import sys
+import os
+
+# Explicitly insert the root project directory into Python's search path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import streamlit as st
 import datetime
 import pandas as pd
