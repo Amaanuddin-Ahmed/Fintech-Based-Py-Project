@@ -3,6 +3,7 @@ import os
 
 # Explicitly insert the root project directory into Python's search path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import streamlit as st
 import datetime
 import pandas as pd
@@ -25,6 +26,8 @@ if "transaction_alert_message" not in st.session_state:
     st.session_state.transaction_alert_message = None
 if "transaction_alert_type" not in st.session_state:
     st.session_state.transaction_alert_type = None
+if "previous_tracked_user" not in st.session_state:
+    st.session_state.previous_tracked_user = None
 
 st.title("🏦 GuardianShield Personal Banking Portal")
 st.markdown("---")
@@ -33,6 +36,8 @@ st.markdown("---")
 try:
     df_users = load_users()
     all_users = sorted(df_users['user_id'].astype(str).str.strip().tolist())
+    # Strip spaces to ensure robust accurate comparison matches
+    df_users['user_id'] = df_users['user_id'].astype(str).str.strip()
 except Exception as e:
     st.error(f"Failed to access user ledger database: {e}")
     all_users = []
@@ -41,6 +46,16 @@ user_search = st.text_input("🔑 System Access Portal - Enter Your User ID (e.g
 
 if user_search:
     clean_input = user_search.strip().upper()
+    
+    # --- USER SESSION RESET SWITCH GATEWAY ---
+    # Detects if a new user input is typed. If changed, it clears out any old state traces.
+    if st.session_state.previous_tracked_user is not None and clean_input != st.session_state.previous_tracked_user:
+        st.session_state.transaction_alert_message = None
+        st.session_state.transaction_alert_type = None
+        st.session_state.otp_active = False
+        st.session_state.current_otp = None
+    
+    st.session_state.previous_tracked_user = clean_input
     matched_search = [u for u in all_users if clean_input in u]
     
     if clean_input in all_users:
@@ -55,6 +70,13 @@ if user_search:
             unsafe_allow_html=True
         )
 else:
+    # Clear alert states if input value is cleared out entirely
+    if st.session_state.previous_tracked_user is not None:
+        st.session_state.transaction_alert_message = None
+        st.session_state.transaction_alert_type = None
+        st.session_state.otp_active = False
+        st.session_state.current_otp = None
+    st.session_state.previous_tracked_user = None
     st.session_state.logged_in_user = None
     st.info("Please input your unique Account ID above to verify your identity session.")
 
@@ -144,7 +166,7 @@ if st.session_state.logged_in_user:
         device_used = st.selectbox("📱 Telemetry Device Signature:", ["iPhone15", "OnePlus_11R", "Pixel_8_Pro", "Samsung_S24", "MacBookPro_M3", "iPhone14_Pro", "Galaxy_U1", "iPad_Air", "Nothing_Phone_2", "iPhone13_Mini", "Hacker_Linux_Terminal"])
         processing_location = st.selectbox("📍 Execution Processing City Geolocation:", ["Mumbai", "Bengaluru", "New Delhi", "Hyderabad", "Pune", "Chennai", "Kolkata", "Ahmedabad", "Jaipur", "Lucknow", "Goa"])
 
-        # Sticky Notification Window
+        # Sticky Notification Window Placement
         if st.session_state.transaction_alert_message:
             if st.session_state.transaction_alert_type == "SUCCESS":
                 st.success(st.session_state.transaction_alert_message)
@@ -170,7 +192,7 @@ if st.session_state.logged_in_user:
         button_ready = recipient_valid and amount > 0 and (not st.session_state.otp_active)
         
         if st.button(button_label, disabled=not button_ready, use_container_width=True):
-            # FIXED: Primary check interception strategy. If the input exceeds the user account balance, fast-fail with an explicit error.
+            # Intercept strategy: Check balance rules before initiating processing engines
             if amount > available_funds:
                 st.session_state.transaction_alert_message = "Transaction declined: Insufficient account funds available."
                 st.session_state.transaction_alert_type = "ERROR"
@@ -238,7 +260,6 @@ if st.session_state.logged_in_user:
                             st.session_state.otp_active = False
                             st.session_state.current_otp = None
                         else:
-                            # FIXED: Fallback filter to handle unexpected message errors or insufficient balance checks during submission
                             error_reason = release_msg if (not success_release and release_msg) else validation_msg
                             st.session_state.transaction_alert_message = f"{error_reason}"
                             st.session_state.transaction_alert_type = "ERROR"
