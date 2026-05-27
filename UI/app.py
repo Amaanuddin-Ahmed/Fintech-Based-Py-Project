@@ -36,19 +36,17 @@ st.markdown("---")
 try:
     df_users = load_users()
     all_users = sorted(df_users['user_id'].astype(str).str.strip().tolist())
-    # Strip spaces to ensure robust accurate comparison matches
     df_users['user_id'] = df_users['user_id'].astype(str).str.strip()
 except Exception as e:
     st.error(f"Failed to access user ledger database: {e}")
     all_users = []
 
-user_search = st.text_input("🔑 System Access Portal - Enter Your User ID (e.g., U101):", placeholder="Type your account ID to unlock dashboard...")
+user_search = st.text_input("🔑 System Access Portal - Enter Your User ID (e.g., U101 or ADMIN):", placeholder="Type account ID or ADMIN to unlock...")
 
 if user_search:
     clean_input = user_search.strip().upper()
     
-    # --- USER SESSION RESET SWITCH GATEWAY ---
-    # Detects if a new user input is typed. If changed, it clears out any old state traces.
+    # Session Reset Switch Gateway
     if st.session_state.previous_tracked_user is not None and clean_input != st.session_state.previous_tracked_user:
         st.session_state.transaction_alert_message = None
         st.session_state.transaction_alert_type = None
@@ -56,13 +54,61 @@ if user_search:
         st.session_state.current_otp = None
     
     st.session_state.previous_tracked_user = clean_input
-    matched_search = [u for u in all_users if clean_input in u]
     
-    if clean_input in all_users:
+    if clean_input == "ADMIN":
+        st.session_state.logged_in_user = "ADMIN"
+        st.warning("⚡ Central Security Clearance Level Detected: Master Admin Session Active")
+        st.markdown("### 🛡️ Master Lockout Management Panel")
+        st.write("Below is the live registry of accounts flagged and frozen by the 3-Strikes Out-of-Band verification protocol.")
+        
+        # Pull latest locked records from the file directly to stay synced
+        users_filepath = "DATA/users.csv"
+        df_admin_view = pd.read_csv(users_filepath)
+        df_admin_view['user_id'] = df_admin_view['user_id'].astype(str).str.strip()
+        
+        locked_users = df_admin_view[df_admin_view['account_status'] == 'LOCKED']
+        
+        if not locked_users.empty:
+            # Display target data summary table
+            st.dataframe(
+                locked_users[['user_id', 'account_holder', 'current_balance', 'failed_otp_attempts']],
+                use_container_width=True,
+                column_config={
+                    "user_id": "User Identifier",
+                    "account_holder": "Account Holder Name",
+                    "current_balance": "Available Balance",
+                    "failed_otp_attempts": "Total Violation Strikes"
+                }
+            )
+            
+            st.markdown("#### 🔓 Pending Clearance Action List")
+            # Loop through rows to generate dynamic unblock options
+            for idx, row in locked_users.iterrows():
+                u_id = row['user_id']
+                u_name = row['account_holder']
+                
+                col_info, col_btn = st.columns([3, 1])
+                with col_info:
+                    st.markdown(f"⚠️ **Account Profile:** {u_id} — *{u_name}* is currently locked.")
+                with col_btn:
+                    # Render custom green button style using markdown container tricks
+                    if st.button(f"🔓 Unblock {u_id}", key=f"unblock_{u_id}", use_container_width=True):
+                        # Apply programmatic modification changes right to file memory
+                        df_admin_view.loc[df_admin_view['user_id'] == u_id, 'account_status'] = 'ACTIVE'
+                        df_admin_view.loc[df_admin_view['user_id'] == u_id, 'failed_otp_attempts'] = 0
+                        df_admin_view.to_csv(users_filepath, index=False)
+                        st.success(f"Successfully unlocked {u_id}! Refreshing dashboard ledger...")
+                        st.rerun()
+        else:
+            st.success("🟢 System Clear: No accounts are currently flagged with active lockout restrictions.")
+            
+    # Standard User Logic Match
+    elif clean_input in all_users:
         st.session_state.logged_in_user = clean_input
         st.success(f"🔐 Identity Verified: Welcome back, {df_users[df_users['user_id'] == clean_input]['account_holder'].values[0]}!")
     else:
         st.session_state.logged_in_user = None
+        matched_search = [u for u in all_users if clean_input in u]
         if matched_search:
             st.caption(f"💡 Did you mean: {', '.join(matched_search)}?")
         st.markdown(
@@ -70,7 +116,6 @@ if user_search:
             unsafe_allow_html=True
         )
 else:
-    # Clear alert states if input value is cleared out entirely
     if st.session_state.previous_tracked_user is not None:
         st.session_state.transaction_alert_message = None
         st.session_state.transaction_alert_type = None
@@ -80,8 +125,8 @@ else:
     st.session_state.logged_in_user = None
     st.info("Please input your unique Account ID above to verify your identity session.")
 
-# 2. RUN TIME DYNAMIC DASHBOARD
-if st.session_state.logged_in_user:
+# 2. RUN TIME DYNAMIC DASHBOARD (Only load if standard user is logged in, not ADMIN)
+if st.session_state.logged_in_user and st.session_state.logged_in_user != "ADMIN":
     current_uid = st.session_state.logged_in_user
     user_profile = df_users[df_users['user_id'] == current_uid].iloc[0]
     
@@ -118,11 +163,18 @@ if st.session_state.logged_in_user:
             st.caption("Figure 1.0: Distribution map showing the value sizes of recent outgoing peer settlements.")
         else:
             st.info("💡 No historical transaction footprint records found for this account layout profile.")
+            st.markdown(
+                """
+                <div style="background-color: #f0f2f6; padding: 40px; text-align: center; border-radius: 10px; border: 1px dashed #ced4da;">
+                    <p style="color: #6c757d; margin: 0; font-size: 16px;">📊 Transaction analytics will populate here once transactions begin.</p>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
 
     with col_actions:
         st.markdown("### 💸 Initiate Outgoing Transfer")
         
-        # Recipient Selection
         recipient_pool = [u for u in all_users if u != current_uid]
         recipient_input = st.text_input("🎯 Target Recipient ID:", placeholder="Search destination accounts...")
         
@@ -142,10 +194,8 @@ if st.session_state.logged_in_user:
                     st.caption(f"💡 Suggested: {', '.join(matched_rec)}")
                 st.markdown('<p style="color: #FF4B4B; background-color: #FFEBEB; padding: 8px; border-radius: 4px;">❌ Invalid recipient ID target.</p>', unsafe_allow_html=True)
 
-        # Step value set to support fractional numeric entry cleanly
         amount = st.number_input("💵 Transfer Value ($):", min_value=0.0, step=0.0000001, format="%.7f")
 
-        # --- 12-HOUR TIME FRAME SELECTOR ---
         st.markdown("##### ⏰ Execution Time Frame")
         time_col1, time_col2, time_col3 = st.columns([1, 1, 1])
         with time_col1:
@@ -155,7 +205,6 @@ if st.session_state.logged_in_user:
         with time_col3:
             am_pm = st.radio("Period:", ["AM", "PM"], horizontal=True, index=0)
 
-        # Convert selection parameters to 24-hour timestamp system integers
         if am_pm == "PM" and hour_12 != 12:
             txn_hour = hour_12 + 12
         elif am_pm == "AM" and hour_12 == 12:
@@ -166,7 +215,6 @@ if st.session_state.logged_in_user:
         device_used = st.selectbox("📱 Telemetry Device Signature:", ["iPhone15", "OnePlus_11R", "Pixel_8_Pro", "Samsung_S24", "MacBookPro_M3", "iPhone14_Pro", "Galaxy_U1", "iPad_Air", "Nothing_Phone_2", "iPhone13_Mini", "Hacker_Linux_Terminal"])
         processing_location = st.selectbox("📍 Execution Processing City Geolocation:", ["Mumbai", "Bengaluru", "New Delhi", "Hyderabad", "Pune", "Chennai", "Kolkata", "Ahmedabad", "Jaipur", "Lucknow", "Goa"])
 
-        # Sticky Notification Window Placement
         if st.session_state.transaction_alert_message:
             if st.session_state.transaction_alert_type == "SUCCESS":
                 st.success(st.session_state.transaction_alert_message)
@@ -187,12 +235,15 @@ if st.session_state.logged_in_user:
                     st.session_state.transaction_alert_type = None
                     st.rerun()
 
-        # Dynamic Button Text Generation
+        # Dynamic Button & Hard Account Block Checks
         button_label = f"💸 Pay ${amount:.7f} from {current_uid} to {target_recipient_display}"
-        button_ready = recipient_valid and amount > 0 and (not st.session_state.otp_active)
+        is_active = user_profile['account_status'] == "ACTIVE"
+        button_ready = recipient_valid and amount > 0 and (not st.session_state.otp_active) and is_active
         
+        if not is_active:
+            st.error("⛔ Access Blocked: This account layout is currently LOCKED due to security flags. Please contact system admin.")
+
         if st.button(button_label, disabled=not button_ready, use_container_width=True):
-            # Intercept strategy: Check balance rules before initiating processing engines
             if amount > available_funds:
                 st.session_state.transaction_alert_message = "Transaction declined: Insufficient account funds available."
                 st.session_state.transaction_alert_type = "ERROR"

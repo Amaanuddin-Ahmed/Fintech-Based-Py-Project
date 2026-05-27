@@ -27,8 +27,15 @@ def verify_otp_attempt(user_id, entered_otp, correct_otp, users_filepath="DATA/u
         
     # Incorrect OTP entered
     else:
-        # Increment the persistent tracking row counter
-        current_attempts = int(df_users.loc[df_users['user_id'] == user_id, 'failed_otp_attempts'].values[0])
+        # Extract the raw element value safely from the matching series index row
+        raw_attempts = df_users.loc[df_users['user_id'] == user_id, 'failed_otp_attempts'].values[0]
+        
+        # DEFENSIVE IMPLEMENTATION: If value is blank, empty, or NaN, convert cleanly to integer 0
+        if pd.isna(raw_attempts):
+            current_attempts = 0
+        else:
+            current_attempts = int(float(raw_attempts))
+            
         new_attempts = current_attempts + 1
         df_users.loc[df_users['user_id'] == user_id, 'failed_otp_attempts'] = new_attempts
         
