@@ -148,8 +148,13 @@ if st.session_state.logged_in_user and st.session_state.logged_in_user != "ADMIN
 
     try:
         df_txns = load_transactions()
-        user_history = df_txns[df_txns["from_user_id"] == current_uid].copy()
-    except:
+        
+        # 🩹 FIX: Clean up spaces and capitalization inside the transaction records so they always match
+        df_txns["from_user_id"] = df_txns["from_user_id"].astype(str).str.strip().str.upper()
+        
+        # Pull matching data matching current user string safely
+        user_history = df_txns[df_txns["from_user_id"] == str(current_uid).strip().upper()].copy()
+    except Exception as e:
         user_history = pd.DataFrame()
 
     col_graphs, col_actions = st.columns([3, 2])
